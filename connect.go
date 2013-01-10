@@ -33,7 +33,7 @@ func (c *Conn) WriteRead(cmd *Command, r Reader) (err error) {
 	defer c.m.Unlock()
 	var written, n int
 	cmdB := cmd.ProtoRequest()
-	for written < len(*cmd) {
+	for written < len(cmdB) {
 		n, err = c.writer.Write(cmdB[written:])
 		if err != nil {
 			return
