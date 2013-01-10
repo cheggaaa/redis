@@ -59,6 +59,10 @@ func (c *Command) String() (s string) {
 func (c *Command) Execute(r *Redis) (reader *ReaderBase, err error) {
 	reader = &ReaderBase{}
 	err = r.Execute(c, reader)
+	if err != nil {
+		return
+	}
+	err = reader.Error()
 	return
 }
 
