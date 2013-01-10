@@ -31,13 +31,18 @@ type Conn struct {
 func (c *Conn) WriteRead(cmd *Command, r Reader) (err error) {
 	c.m.Lock()
 	defer c.m.Unlock()
-	_, err = c.writer.Write(cmd.ProtoRequest())
-	if err != nil {
-		return
-	}
-	err = c.writer.Flush()
-	if err != nil {
-		return
+	var written, n int
+	cmdB := cmd.ProtoRequest()
+	for written < len(*cmd) {
+		n, err = c.writer.Write(cmdB[written:])
+		if err != nil {
+			return
+		}
+		err = c.writer.Flush()
+		if err != nil {
+			return
+		}
+		written += n
 	}
 	err = r.Read(c.reader)
 	return	
