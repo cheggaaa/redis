@@ -45,3 +45,19 @@ func (r *Redis) Get(key string) (bulk Bulk, err error) {
 	bulk = resp.bulk
 	return
 }
+
+// Append a value to a key
+func (r *Redis) Append(key string, value []byte) (length int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("APPEND"),
+		[]byte(key),
+		value,
+	}
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	length = resp.integer
+	return
+}

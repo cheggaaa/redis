@@ -37,3 +37,22 @@ func TestSetGet(t *testing.T) {
 		t.Errorf("Unexpected value %s", string(r))
 	}
 }
+
+
+func TestAppend(t *testing.T) {
+	RD.Set("testkey", []byte("testvalue"))
+	l, err := RD.Append("testkey", []byte("_append"))
+	if err != nil {
+		t.Error(err)
+	}
+	if l != len("testvalue_append") {
+		t.Error("Unexpected len")
+	}
+	r, err := RD.Get("testkey")
+	if err != nil {
+		t.Error(err)
+	}
+	if r.S() != "testvalue_append" {
+		t.Errorf("Unexpected value %s", string(r))
+	}
+}
