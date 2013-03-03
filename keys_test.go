@@ -17,6 +17,7 @@ func TestConnect(t *testing.T) {
 
 
 func TestDel(t *testing.T) {
+	RD.Set("testkey", []byte("testvalue"))
 	RD.Set("testkey2", []byte("testvalue"))
 	RD.Set("testkey3", []byte("testvalue"))
 	c, err := RD.Del("testkey")

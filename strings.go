@@ -1,5 +1,9 @@
 package redis
 
+import "errors"
+
+var errZeroLengthValues = errors.New("Can't send zero values")
+
 func (r *Redis) Ping() (pong string, err error) {
 	resp := &ReaderBase{}
 	cmd := &Command{
@@ -154,5 +158,80 @@ func (r *Redis) GetRange(key string, start, end int) (bulk Bulk, err error) {
 		return
 	}
 	bulk = resp.bulk
+	return
+}
+
+
+// Set multiple keys to multiple values
+func (r *Redis) MSet(values map[string][]byte) (err error) {
+	if len(values) == 0 {
+		return errZeroLengthValues
+	}
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("MSET"),
+	}
+	
+	for key, value := range values {
+		cmd.AddString(key).Add(value)	
+	}
+	
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	if ! resp.isOk() {
+		err = ErrNotOk
+	}
+	return
+}
+
+// Set multiple keys to multiple values, only if none of the keys exist
+func (r *Redis) MSetNx(values map[string][]byte) (ok bool, err error) {
+	if len(values) == 0 {
+		return false, errZeroLengthValues
+	}
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("MSETNX"),
+	}
+	
+	for key, value := range values {
+		cmd.AddString(key).Add(value)	
+	}
+	
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	if resp.integer > 0 {
+		ok = true
+	}
+	return
+}
+
+// Get the values of all the given keys
+func (r *Redis) MGet(keys... string) (values map[string]Bulk, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("MGET"),
+	}
+	
+	for _, key := range keys {
+		cmd.AddString(key)
+	}
+	
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	
+	mb := resp.multiBulk	
+	values = make(map[string]Bulk, len(keys))
+	
+	for i, key := range keys {
+		values[key] = mb[i]
+	}
+	
 	return
 }
