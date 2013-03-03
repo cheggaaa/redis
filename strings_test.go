@@ -106,3 +106,14 @@ func TestGetSet(t *testing.T) {
 		t.Error("Unexpected getset output")
 	}
 }
+
+func TestGetRange(t *testing.T) {
+	RD.Set("testgetrange", []byte("hello world"))
+	b, err := RD.GetRange("testgetrange", 0, 4)
+	if err != nil {
+		t.Error(err)
+	}
+	if b.S() != "hello" {
+		t.Error("Unexpected getrange output", b.S())
+	}
+}

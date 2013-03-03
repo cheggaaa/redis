@@ -140,3 +140,19 @@ func (r *Redis) GetSet(key string, value []byte) (bulk Bulk, err error) {
 	bulk = resp.bulk
 	return
 }
+
+// Get a substring of the string stored at a key
+func (r *Redis) GetRange(key string, start, end int) (bulk Bulk, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("GETRANGE"),
+		[]byte(key),
+	}
+	cmd.AddInt(start).AddInt(end)
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	bulk = resp.bulk
+	return
+}
