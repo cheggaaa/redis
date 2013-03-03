@@ -88,3 +88,21 @@ func TestIncrDescr(t *testing.T) {
 		t.Error("Unexpected increment ouput")
 	}
 }
+
+func TestGetSet(t *testing.T) {
+	RD.Set("testgetset", []byte("old"))
+	b, err := RD.GetSet("testgetset", []byte("new"))
+	if err != nil {
+		t.Error(err)
+	}
+	if b.S() != "old" {
+		t.Error("Unexpected getset output")
+	}
+	b, err = RD.Get("testgetset")
+	if err != nil {
+		t.Error(err)
+	}
+	if b.S() != "new" {
+		t.Error("Unexpected getset output")
+	}
+}

@@ -124,3 +124,19 @@ func (r *Redis) IncrBy(key string, number int) (value int, err error) {
 	value = resp.integer
 	return
 }
+
+// Set the string value of a key and return its old value
+func (r *Redis) GetSet(key string, value []byte) (bulk Bulk, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("GETSET"),
+		[]byte(key),
+		value,
+	}
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	bulk = resp.bulk
+	return
+}
