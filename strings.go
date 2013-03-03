@@ -61,3 +61,66 @@ func (r *Redis) Append(key string, value []byte) (length int, err error) {
 	length = resp.integer
 	return
 }
+
+// Decrement the integer value of a key by one
+func (r *Redis) Decr(key string) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("DECR"),
+		[]byte(key),
+	}
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
+
+// Decrement the integer value of a key by the given number
+func (r *Redis) DecrBy(key string, number int) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("DECRBY"),
+		[]byte(key),
+	}
+	cmd.AddInt(number)
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
+
+
+// Increment the integer value of a key by one
+func (r *Redis) Incr(key string) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("INCR"),
+		[]byte(key),
+	}
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
+
+// Increment the integer value of a key by the given number
+func (r *Redis) IncrBy(key string, number int) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("INCRBY"),
+		[]byte(key),
+	}
+	cmd.AddInt(number)
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
