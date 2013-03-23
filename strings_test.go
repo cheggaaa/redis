@@ -164,6 +164,73 @@ func TestMGetMSet(t *testing.T) {
 		if string(values[k]) != v.S() {
 			t.Error("Not equals!")
 		}
+	}	
+}
+
+func TestBitOps(t *testing.T) {
+	// SETBIT
+	defer RD.Del("testsetbit")
+	r, err := RD.SetBit("testsetbit", 7, 1)
+	if err != nil {
+		t.Error(err)
+	}
+	if r != 0 {
+		t.Errorf("Unexpected SETBIT result: %d", r)
+	}
+	if s, _ := RD.Get("testsetbit"); s.S() != "\x01" {
+		t.Errorf("Unexpected SETBIT result: %s", s.S())
+	}
+	
+	// GETBIT
+	r, err = RD.GetBit("testsetbit", 0)
+	if err != nil {
+		t.Error(err)
+	}
+	if r != 0 {
+		t.Errorf("Unexpected GETBIT result: %d", r)
+	}
+	r, err = RD.GetBit("testsetbit", 7)
+	if err != nil {
+		t.Error(err)
+	}
+	if r != 1 {
+		t.Errorf("Unexpected GETBIT result: %d", r)
+	}
+	
+	// BITCOUNT
+	RD.Set("testbitcount", []byte("ololo"))
+	defer RD.Del("testbitcount")
+	
+	r, err = RD.BitCount("testbitcount", nil, nil)
+	if err != nil {
+		t.Error(err)
+	}
+	if r != 26 {
+		t.Errorf("Unexpected result BITCOUNT: %d", r)
+	}
+	
+	if r, _ = RD.BitCount("testbitcount", &NilInt{0}, &NilInt{0}); r != 6 {
+		t.Errorf("Unexpected result BITCOUNT: %d", r)
+	}
+	if r, _ = RD.BitCount("testbitcount", &NilInt{0}, &NilInt{1}); r != 10 {
+		t.Errorf("Unexpected result BITCOUNT: %d", r)
+	}
+	
+	// BITOP
+	RD.MSet(map[string][]byte{
+		"testbitop1" : []byte("olo1"),
+		"testbitop2" : []byte("olo2"),
+	})
+	defer RD.Del("testbitop1", "testbitop2", "testbitopand")	
+	r, err = RD.BitOp(BITOP_AND, "testbitopand", "testbitop1", "testbitop2")
+	if err != nil {
+		t.Error(err)
+	}
+	if r != 4 {
+		t.Errorf("Unexpected result BITOP: %d", r)
+	}
+	if rs, _ := RD.Get("testbitopand"); rs.S() != "olo0" {
+		t.Errorf("Unexpected result BITOP AND: %s", rs.S())
 	}
 	
 }

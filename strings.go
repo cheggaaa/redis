@@ -4,6 +4,13 @@ import "errors"
 
 var errZeroLengthValues = errors.New("Can't send zero values")
 
+const (
+	BITOP_AND = "AND"
+	BITOP_OR = "OR"
+	BITOP_XOR = "XOR"
+	BITOP_NOT = "NOT"
+)
+
 func (r *Redis) Ping() (pong string, err error) {
 	resp := &ReaderBase{}
 	cmd := &Command{
@@ -233,5 +240,78 @@ func (r *Redis) MGet(keys... string) (values map[string]Bulk, err error) {
 		values[key] = mb[i]
 	}
 	
+	return
+}
+
+// Count set bits in a string
+// For example:
+//    Redis.BitCount("mykey", nil, nil) - will be BITCOUNT mykey
+//    Redis.BitCount("mykey", &redis.NilInt{0}, &redis.Int{4}) - will be BITCOUNT mykey 0 4
+//    Redis.BitCount("mykey", &redis.NilInt{2}, nil) - will be BITCOUNT mykey
+func (r *Redis) BitCount(key string, start, end *NilInt) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("BITCOUNT"),
+		[]byte(key),
+	}
+	if start != nil && end != nil {
+		cmd.AddInt(start.I).AddInt(end.I)
+	}	
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
+
+// Perform bitwise operations between strings
+func (r *Redis) BitOp(destKey, op string, key... string) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("BITOP"),
+		[]byte(destKey),
+		[]byte(op),
+	}
+	for _, k := range key {
+		cmd.AddString(k)
+	}	
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
+
+// Returns the bit value at offset in the string value stored at key
+func (r *Redis) GetBit(key string, offset int) (value int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("GETBIT"),
+		[]byte(key),
+	}
+	cmd.AddInt(offset)
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	value = resp.integer
+	return
+}
+
+// Sets or clears the bit at offset in the string value stored at key
+func (r *Redis) SetBit(key string, offset, value int) (result int, err error) {
+	resp := &ReaderBase{}
+	cmd := &Command{
+		[]byte("SETBIT"),
+		[]byte(key),
+	}
+	cmd.AddInt(offset).AddInt(value)
+	err = r.Execute(cmd, resp)
+	if err != nil {
+		return
+	}
+	result = resp.integer
 	return
 }
