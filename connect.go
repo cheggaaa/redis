@@ -1,10 +1,10 @@
 package redis
 
 import (
+	"bufio"
 	"net"
 	"sync"
 	"time"
-	"bufio"
 )
 
 func newConn(netw, addr string, timeout time.Duration) (conn *Conn, err error) {
@@ -13,10 +13,10 @@ func newConn(netw, addr string, timeout time.Duration) (conn *Conn, err error) {
 		return
 	}
 	conn = &Conn{
-		reader : bufio.NewReader(c), 
-		writer : bufio.NewWriter(c), 
-		c      : c,
-		m      : &sync.Mutex{},
+		reader: bufio.NewReader(c),
+		writer: bufio.NewWriter(c),
+		c:      c,
+		m:      &sync.Mutex{},
 	}
 	return
 }
@@ -24,8 +24,8 @@ func newConn(netw, addr string, timeout time.Duration) (conn *Conn, err error) {
 type Conn struct {
 	reader *bufio.Reader
 	writer *bufio.Writer
-	c       net.Conn
-	m       *sync.Mutex
+	c      net.Conn
+	m      *sync.Mutex
 }
 
 func (c *Conn) WriteRead(cmd *Command, r Reader) (err error) {
@@ -45,5 +45,5 @@ func (c *Conn) WriteRead(cmd *Command, r Reader) (err error) {
 		written += n
 	}
 	err = r.Read(c.reader)
-	return	
+	return
 }

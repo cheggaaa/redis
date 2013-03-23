@@ -5,7 +5,7 @@ import (
 )
 
 type Config struct {
-	Addr string
+	Addr           string
 	MaxConnections int
 	ConnectTimeout time.Duration
 }

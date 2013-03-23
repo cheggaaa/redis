@@ -1,7 +1,7 @@
 package redis
 
 // Delete a key
-func (r *Redis) Del(key ... string) (count int, err error) {
+func (r *Redis) Del(key ...string) (count int, err error) {
 	cmd := &Command{[]byte("DEL")}
 	for _, k := range key {
 		cmd.AddString(k)
@@ -72,8 +72,7 @@ func (r *Redis) PExpireAt(key string, timestamp int) (ok bool, err error) {
 		[]byte(key),
 	}
 	cmd.AddInt(timestamp)
-	i, _, err := cmd.ExecuteInteger(r)
-	if err == nil {
+	if i, _, err := cmd.ExecuteInteger(r); err == nil {
 		ok = i > 0
 	}
 	return
@@ -119,11 +118,9 @@ func (r *Redis) Dump(key string) (result []byte, err error) {
 		[]byte("DUMP"),
 		[]byte(key),
 	}
-	resp, err := cmd.Execute(r)
-	if err != nil {
-		return
+	if resp, err := cmd.Execute(r); err == nil {
+		result = []byte(resp.bulk)
 	}
-	result = []byte(resp.bulk)
 	return
 }
 
@@ -134,8 +131,7 @@ func (r *Redis) Move(key string, db int) (moved bool, err error) {
 		[]byte(key),
 	}
 	cmd.AddInt(db)
-	i, _, err := cmd.ExecuteInteger(r)
-	if err == nil && i > 0 {
+	if i, _, err := cmd.ExecuteInteger(r); err == nil && i > 0 {
 		moved = true
 	}
 	return
@@ -169,9 +165,8 @@ func (r *Redis) Persist(key string) (timeoutRemoved bool, err error) {
 		[]byte("PERSIST"),
 		[]byte(key),
 	}
-	
-	i, _, err := cmd.ExecuteInteger(r)
-	if err == nil && i > 0 {
+
+	if i, _, err := cmd.ExecuteInteger(r); err == nil && i > 0 {
 		timeoutRemoved = true
 	}
 	return
@@ -182,11 +177,9 @@ func (r *Redis) RandomKey() (key Bulk, err error) {
 	cmd := &Command{
 		[]byte("RANDOMKEY"),
 	}
-	resp, err := cmd.Execute(r)
-	if err != nil {
-		return
+	if resp, err := cmd.Execute(r); err == nil {
+		key = resp.bulk
 	}
-	key = resp.bulk
 	return
 }
 
@@ -201,11 +194,11 @@ func (r *Redis) Rename(key, newKey string) (err error) {
 	if err != nil {
 		return
 	}
-	if ! resp.isOk() {
+	if !resp.isOk() {
 		err = ErrNotOk
 	}
 	return
-}  
+}
 
 // Rename a key, only if the new key does not exist
 func (r *Redis) RenameNx(key, newKey string) (renamed bool, err error) {
@@ -214,13 +207,12 @@ func (r *Redis) RenameNx(key, newKey string) (renamed bool, err error) {
 		[]byte(key),
 		[]byte(newKey),
 	}
-	
-	i, _, err := cmd.ExecuteInteger(r)
-	if err == nil && i > 0 {
+
+	if i, _, err := cmd.ExecuteInteger(r); err == nil && i > 0 {
 		renamed = true
 	}
 	return
-}  
+}
 
 // Create a key using the provided serialized value, previously obtained using DUMP
 func (r *Redis) Restore(key string, ttl int, value []byte) (err error) {
@@ -233,11 +225,11 @@ func (r *Redis) Restore(key string, ttl int, value []byte) (err error) {
 	if err != nil {
 		return
 	}
-	if ! resp.isOk() {
+	if !resp.isOk() {
 		err = ErrNotOk
 	}
 	return
-}  
+}
 
 // Determine the type stored at key
 func (r *Redis) Type(key string) (keyType string, err error) {

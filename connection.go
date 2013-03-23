@@ -1,15 +1,16 @@
 package redis
 
 func (r *Redis) Select(db int) (err error) {
+	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("SELECT"),
-	}	
-	resp, err := cmd.AddInt(db).Execute(r)
-	if err != nil {
+	}
+	cmd.AddInt(db)
+	if err = r.Execute(cmd, resp); err != nil {
 		return
 	}
-	if ! resp.isOk() {
-		return ErrNotOk
+	if !resp.isOk() {
+		err = ErrNotOk
 	}
 	return
 }

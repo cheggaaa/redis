@@ -1,8 +1,6 @@
 package redis
 
-import (
-
-)
+import ()
 
 func newPool(c *Config) (pool *ConnPool, err error) {
 	pool = &ConnPool{
@@ -19,6 +17,6 @@ func newPool(c *Config) (pool *ConnPool, err error) {
 }
 
 type ConnPool struct {
-	in chan *Command
+	in    chan *Command
 	conns []*Conn
 }

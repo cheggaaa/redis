@@ -12,7 +12,7 @@ func NewClientFromConfig(config *Config) (client *Redis, err error) {
 		return
 	}
 	client = &Redis{
-		Config : config,
+		Config: config,
 	}
 	err = client.connect()
 	if err != nil {

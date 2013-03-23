@@ -6,8 +6,7 @@ func (r *Redis) ZAdd(key string, score int, member string) (result int, err erro
 		[]byte("ZADD"),
 		[]byte(key),
 	}
-	cmd.AddInt(score).AddString(member)
-	result, _, err = cmd.ExecuteInteger(r)
+	result, _, err = cmd.AddInt(score).AddString(member).ExecuteInteger(r)
 	return
 }
 
@@ -27,20 +26,17 @@ func (r *Redis) ZCount(key string, min, max int) (result int, err error) {
 		[]byte("ZCOUNT"),
 		[]byte(key),
 	}
-	cmd.AddInt(min).AddInt(max)
-	result, _, err = cmd.ExecuteInteger(r)
+	result, _, err = cmd.AddInt(min).AddInt(max).ExecuteInteger(r)
 	return
 }
 
 // Increment the score of a member in a sorted set
 func (r *Redis) ZIncrBy(key string, incr int, member string) (result int, err error) {
-	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("ZINCRBY"),
 		[]byte(key),
 	}
-	cmd.AddInt(incr).AddString(member)
-	err = r.Execute(cmd, resp)
+	resp, err := cmd.AddInt(incr).AddString(member).Execute(r)
 	if err != nil {
 		return
 	}
@@ -50,7 +46,6 @@ func (r *Redis) ZIncrBy(key string, incr int, member string) (result int, err er
 
 // Return a range of members in a sorted set, by index
 func (r *Redis) ZRange(key string, start, stop int, withscores bool) (result MultiBulk, err error) {
-	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("ZRANGE"),
 		[]byte(key),
@@ -59,17 +54,14 @@ func (r *Redis) ZRange(key string, start, stop int, withscores bool) (result Mul
 	if withscores {
 		cmd.AddString("WITHSCORES")
 	}
-	err = r.Execute(cmd, resp)
-	if err != nil {
-		return
+	if resp, err := cmd.Execute(r); err == nil {
+		result = resp.multiBulk
 	}
-	result = resp.multiBulk
 	return
 }
 
 // Return a range of members in a sorted set, by score (with limit)
 func (r *Redis) ZRangeByScoreLimit(key string, min, max int, withscores bool, offset, count int) (result MultiBulk, err error) {
-	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("ZRANGEBYSCORE"),
 		[]byte(key),
@@ -79,13 +71,11 @@ func (r *Redis) ZRangeByScoreLimit(key string, min, max int, withscores bool, of
 		cmd.AddString("WITHSCORES")
 	}
 	if count > 0 {
-		cmd.AddString("LIMIT").AddInt(offset).AddInt(count)	
+		cmd.AddString("LIMIT").AddInt(offset).AddInt(count)
 	}
-	err = r.Execute(cmd, resp)
-	if err != nil {
-		return
+	if resp, err := cmd.Execute(r); err == nil {
+		result = resp.multiBulk
 	}
-	result = resp.multiBulk
 	return
 }
 
@@ -106,10 +96,10 @@ func (r *Redis) ZRank(key, member string) (result int, exists bool, err error) {
 }
 
 // Remove one or more members from a sorted set
-func (r *Redis) ZRem(key string, member ... string) (count int, err error) {
+func (r *Redis) ZRem(key string, member ...string) (count int, err error) {
 	cmd := &Command{
 		[]byte("ZREM"),
-		[]byte(key),	
+		[]byte(key),
 	}
 	for _, m := range member {
 		cmd.AddString(m)
@@ -124,8 +114,7 @@ func (r *Redis) ZRemRangeByRank(key string, start, stop int) (result int, err er
 		[]byte("ZREMRANGEBYRANK"),
 		[]byte(key),
 	}
-	cmd.AddInt(start).AddInt(stop)
-	result, _, err = cmd.ExecuteInteger(r)
+	result, _, err = cmd.AddInt(start).AddInt(stop).ExecuteInteger(r)
 	return
 }
 
@@ -135,15 +124,12 @@ func (r *Redis) ZRemRangeByScore(key string, min, max int) (result int, err erro
 		[]byte("ZREMRANGEBYSCORE"),
 		[]byte(key),
 	}
-	cmd.AddInt(min).AddInt(max)
-	result, _, err = cmd.ExecuteInteger(r)
+	result, _, err = cmd.AddInt(min).AddInt(max).ExecuteInteger(r)
 	return
 }
 
-
 // Return a range of members in a sorted set, by index, with scores ordered from high to low
 func (r *Redis) ZRevRange(key string, start, stop int, withscores bool) (result MultiBulk, err error) {
-	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("ZREVRANGE"),
 		[]byte(key),
@@ -152,17 +138,14 @@ func (r *Redis) ZRevRange(key string, start, stop int, withscores bool) (result 
 	if withscores {
 		cmd.AddString("WITHSCORES")
 	}
-	err = r.Execute(cmd, resp)
-	if err != nil {
-		return
+	if resp, err := cmd.Execute(r); err == nil {
+		result = resp.multiBulk
 	}
-	result = resp.multiBulk
 	return
 }
 
 // Return a range of members in a sorted set, by score, with scores ordered from high to low (with limit)
 func (r *Redis) ZRevRangeByScoreLimit(key string, min, max int, withscores bool, offset, count int) (result MultiBulk, err error) {
-	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("ZREVRANGEBYSCORE"),
 		[]byte(key),
@@ -172,13 +155,11 @@ func (r *Redis) ZRevRangeByScoreLimit(key string, min, max int, withscores bool,
 		cmd.AddString("WITHSCORES")
 	}
 	if count > 0 {
-		cmd.AddString("LIMIT").AddInt(offset).AddInt(count)	
+		cmd.AddString("LIMIT").AddInt(offset).AddInt(count)
 	}
-	err = r.Execute(cmd, resp)
-	if err != nil {
-		return
+	if resp, err := cmd.Execute(r); err == nil {
+		result = resp.multiBulk
 	}
-	result = resp.multiBulk
 	return
 }
 
@@ -200,13 +181,12 @@ func (r *Redis) ZRevRank(key, member string) (result int, exists bool, err error
 
 // Get the score associated with the given member in a sorted set
 func (r *Redis) ZScore(key, member string) (result int, exists bool, err error) {
-	resp := &ReaderBase{}
 	cmd := &Command{
 		[]byte("ZSCORE"),
 		[]byte(key),
 		[]byte(member),
 	}
-	err = r.Execute(cmd, resp)
+	resp, err := cmd.Execute(r)
 	if err != nil {
 		return
 	}

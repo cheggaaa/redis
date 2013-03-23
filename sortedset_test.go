@@ -5,17 +5,17 @@ import (
 )
 
 var testZSet = map[int]string{
-		1 : "one",
-		2 : "two",
-		3 : "three",
-		4 : "four",
-		5 : "five",
-	}
+	1: "one",
+	2: "two",
+	3: "three",
+	4: "four",
+	5: "five",
+}
 
 func TestZAdd(t *testing.T) {
 	RD.Del("testzset")
 	defer RD.Del("testzset")
-	
+
 	i, err := RD.ZAdd("testzset", 1, "one")
 	if err != nil {
 		t.Error(err)
@@ -30,7 +30,7 @@ func TestZCard(t *testing.T) {
 	for score, member := range testZSet {
 		RD.ZAdd("testzset", score, member)
 	}
-	
+
 	i, err := RD.ZCard("testzset")
 	if err != nil {
 		t.Error(err)
@@ -45,7 +45,7 @@ func TestZCount(t *testing.T) {
 	for score, member := range testZSet {
 		RD.ZAdd("testzset", score, member)
 	}
-		
+
 	i, err := RD.ZCount("testzset", 0, 10)
 	if err != nil {
 		t.Error(err)
@@ -53,7 +53,7 @@ func TestZCount(t *testing.T) {
 	if i != 5 {
 		t.Errorf("Must be 5, but %d expected", i)
 	}
-	
+
 	i, err = RD.ZCount("testzset", 2, 3)
 	if err != nil {
 		t.Error(err)
@@ -61,7 +61,7 @@ func TestZCount(t *testing.T) {
 	if i != 2 {
 		t.Errorf("Must be 2, but %d expected", i)
 	}
-	
+
 	i, err = RD.ZCount("testzset", 0, 1)
 	if err != nil {
 		t.Error(err)
@@ -71,11 +71,10 @@ func TestZCount(t *testing.T) {
 	}
 }
 
-
 func TestZIncrBy(t *testing.T) {
 	defer RD.Del("testzset")
 	RD.ZAdd("testzset", 1, "one")
-	
+
 	i, err := RD.ZIncrBy("testzset", 1, "one")
 	if err != nil {
 		t.Error(err)
@@ -83,7 +82,7 @@ func TestZIncrBy(t *testing.T) {
 	if i != 2 {
 		t.Errorf("Must be 2, but %d expected", i)
 	}
-	
+
 	i, err = RD.ZIncrBy("testzset", 10, "one")
 	if err != nil {
 		t.Error(err)
@@ -93,9 +92,8 @@ func TestZIncrBy(t *testing.T) {
 	}
 }
 
-
 func TestZRange(t *testing.T) {
-	
+
 }
 
 func TestZRangeByScoreLimit(t *testing.T) {
@@ -110,11 +108,9 @@ func TestZRank(t *testing.T) {
 
 }
 
-
 func TestZRem(t *testing.T) {
 
 }
-
 
 func TestZRemRangeByRank(t *testing.T) {
 
@@ -128,7 +124,6 @@ func TestZRevRange(t *testing.T) {
 
 }
 
-
 func TestZRevRangeByScoreLimit(t *testing.T) {
 
 }
@@ -136,7 +131,6 @@ func TestZRevRangeByScoreLimit(t *testing.T) {
 func TestZRevRangeByScore(t *testing.T) {
 
 }
-
 
 func TestZRevRank(t *testing.T) {
 

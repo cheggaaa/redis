@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	crlf = "\r\n"
+	crlf    = "\r\n"
 	numargs = "*"
-	arglen = "$"
+	arglen  = "$"
 )
 
 type Command [][]byte
@@ -15,7 +15,7 @@ type Command [][]byte
 func (c *Command) ProtoRequest() (request []byte) {
 	request = []byte(numargs + strconv.Itoa(len(*c)) + crlf)
 	for _, arg := range *c {
-		request = append(request, []byte(arglen + strconv.Itoa(len(arg)) + crlf)...)
+		request = append(request, []byte(arglen+strconv.Itoa(len(arg))+crlf)...)
 		request = append(request, arg...)
 		request = append(request, []byte(crlf)...)
 	}
@@ -58,8 +58,7 @@ func (c *Command) String() (s string) {
 
 func (c *Command) Execute(r *Redis) (reader *ReaderBase, err error) {
 	reader = &ReaderBase{}
-	err = r.Execute(c, reader)
-	if err != nil {
+	if err = r.Execute(c, reader); err != nil {
 		return
 	}
 	err = reader.Error()

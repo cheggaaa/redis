@@ -40,7 +40,6 @@ func TestSetGet(t *testing.T) {
 	}
 }
 
-
 func TestAppend(t *testing.T) {
 	RD.Set("testkey", []byte("testvalue"))
 	defer RD.Del("testkey")
@@ -126,24 +125,24 @@ func TestGetRange(t *testing.T) {
 
 func TestMGetMSet(t *testing.T) {
 	values := map[string][]byte{
-		"testmset1" : []byte("v1"),
-		"testmset2" : []byte("v2"),
-		"testmset3" : []byte("v3"),
-		"testmset4" : []byte("v4"),
+		"testmset1": []byte("v1"),
+		"testmset2": []byte("v2"),
+		"testmset3": []byte("v3"),
+		"testmset4": []byte("v4"),
 	}
-	
+
 	keys := make([]string, 0)
 	for k := range values {
 		keys = append(keys, k)
 	}
-	
+
 	defer RD.Del(keys...)
-	
+
 	err := RD.MSet(values)
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	b, err := RD.Get("testmset2")
 	if err != nil {
 		t.Error(err)
@@ -151,12 +150,12 @@ func TestMGetMSet(t *testing.T) {
 	if b.S() != "v2" {
 		t.Error("Unsexpected value: ", b.S())
 	}
-	
+
 	r, err := RD.MGet(keys...)
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	if len(r) != len(values) {
 		t.Error("Unexpected MGet length")
 	}
@@ -164,7 +163,7 @@ func TestMGetMSet(t *testing.T) {
 		if string(values[k]) != v.S() {
 			t.Error("Not equals!")
 		}
-	}	
+	}
 }
 
 func TestBitOps(t *testing.T) {
@@ -180,7 +179,7 @@ func TestBitOps(t *testing.T) {
 	if s, _ := RD.Get("testsetbit"); s.S() != "\x01" {
 		t.Errorf("Unexpected SETBIT result: %s", s.S())
 	}
-	
+
 	// GETBIT
 	r, err = RD.GetBit("testsetbit", 0)
 	if err != nil {
@@ -196,11 +195,11 @@ func TestBitOps(t *testing.T) {
 	if r != 1 {
 		t.Errorf("Unexpected GETBIT result: %d", r)
 	}
-	
+
 	// BITCOUNT
 	RD.Set("testbitcount", []byte("ololo"))
 	defer RD.Del("testbitcount")
-	
+
 	r, err = RD.BitCount("testbitcount", nil, nil)
 	if err != nil {
 		t.Error(err)
@@ -208,20 +207,20 @@ func TestBitOps(t *testing.T) {
 	if r != 26 {
 		t.Errorf("Unexpected result BITCOUNT: %d", r)
 	}
-	
+
 	if r, _ = RD.BitCount("testbitcount", &NilInt{0}, &NilInt{0}); r != 6 {
 		t.Errorf("Unexpected result BITCOUNT: %d", r)
 	}
 	if r, _ = RD.BitCount("testbitcount", &NilInt{0}, &NilInt{1}); r != 10 {
 		t.Errorf("Unexpected result BITCOUNT: %d", r)
 	}
-	
+
 	// BITOP
 	RD.MSet(map[string][]byte{
-		"testbitop1" : []byte("olo1"),
-		"testbitop2" : []byte("olo2"),
+		"testbitop1": []byte("olo1"),
+		"testbitop2": []byte("olo2"),
 	})
-	defer RD.Del("testbitop1", "testbitop2", "testbitopand")	
+	defer RD.Del("testbitop1", "testbitop2", "testbitopand")
 	r, err = RD.BitOp(BITOP_AND, "testbitopand", "testbitop1", "testbitop2")
 	if err != nil {
 		t.Error(err)
@@ -232,5 +231,5 @@ func TestBitOps(t *testing.T) {
 	if rs, _ := RD.Get("testbitopand"); rs.S() != "olo0" {
 		t.Errorf("Unexpected result BITOP AND: %s", rs.S())
 	}
-	
+
 }

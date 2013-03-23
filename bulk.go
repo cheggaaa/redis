@@ -2,9 +2,9 @@ package redis
 
 import (
 	"bytes"
-	"strconv"
+	"encoding/gob"
 	"encoding/json"
-	"encoding/gob"	
+	"strconv"
 )
 
 type Bulk []byte
